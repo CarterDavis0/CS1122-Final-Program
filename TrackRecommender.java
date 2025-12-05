@@ -364,17 +364,25 @@ public class TrackRecommender {
         String method = "";
         int number = 0;
 
-        System.out.print("To generate a playlist, enter a user ID: ");
+        System.out.print("To generate a playlist, enter a user ID. For a" 
+        + " random ID, enter R: ");
         while (search) {
             user = input.next();
-            if (rec.data.getUsernames().contains(user)) {
+            if (rec.data.getUsernames().contains(user) || 
+            user.equals("R")) {
                 search = false;
             } else {
                 System.out.print("\nUser ID not found. Please try again: ");
             }
         }
+
+        // If the user wants to generate a random user ID
+        int usersLength = rec.data.getUsernames().size();
+        if (user.equals("R")) {
+            user = rec.data.getUsernames().get((int)(Math.random() * 
+            usersLength));
+        }
         search = true;
-        // Idea: option to select a random user ID
 
         // Get field input
         System.out.println("\nSelect the field you would like to generate "
