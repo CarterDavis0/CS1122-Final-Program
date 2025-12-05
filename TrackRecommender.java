@@ -277,17 +277,15 @@ public class TrackRecommender {
 
             // Add tracks to playlist
             try {
-                for (int i = 0; i < data.getUserTrackMap().get(similarUser).size
-                (); i++) {
-                    playList.add(data.getUserTrackMap().get(similarUser).get
-                    (i));
+                for (int i = 0; i < data.getUserTrackMap().get(similarUser).size(); i++) {
+                    playList.add(data.getUserTrackMap().get(similarUser).get(i));
                     tracksAdded++;
                     if (tracksAdded == numberOfTracks) {
                         break;
                     }
                 }
-                // If numberOfTracks exceeds the total number of tracks, break 
-                // out of the loop once all tracks have been added. This will 
+                // If numberOfTracks exceeds the total number of tracks, break
+                // out of the loop once all tracks have been added. This will
                 // be every track not submitted by the user.
             } catch (NullPointerException e) {
                 break;
@@ -359,101 +357,127 @@ public class TrackRecommender {
         // Extra Credit: Command-Line UI
         Scanner input = new Scanner(System.in);
         boolean search = true;
+        boolean outerLoop = true;
         String user = "";
         String field = "";
         String method = "";
+        String leave = "";
         int number = 0;
 
-        System.out.print("To generate a playlist, enter a user ID. For a" 
-        + " random ID, enter R: ");
-        while (search) {
-            user = input.next();
-            if (rec.data.getUsernames().contains(user) || 
-            user.equals("R")) {
-                search = false;
+        while (outerLoop) {
+
+            System.out.print("\nTo generate a playlist, enter a user ID. For a"
+                    + " random ID, enter R: ");
+            while (search) {
+                user = input.next();
+                if (rec.data.getUsernames().contains(user) ||
+                        user.equals("R")) {
+                    search = false;
+                } else {
+                    System.out.print("\nUser ID not found. "
+                            + "Please try again:");
+                }
+            }
+
+            // If the user wants to generate a random user ID
+            int usersLength = rec.data.getUsernames().size();
+            if (user.equals("R")) {
+                user = rec.data.getUsernames().get((int) (Math.random() *
+                        usersLength));
+            }
+            search = true;
+
+            // Get field input
+            System.out.println("\nSelect the field you would like to generate "
+                    + "the playlist based on: ");
+            System.out.println("Song Title: Enter A");
+            System.out.println("Artist: Enter B");
+            System.out.println("Genre, Enter C");
+
+            while (search) {
+                field = input.next();
+                if (field.toUpperCase().equals("A") || field.toUpperCase().equals("B") || field.equals("C")) {
+                    search = false;
+                } else {
+                    System.out.print(field + " is not a valid selection. Please"
+                            + "choose A, B, or C: ");
+                }
+            }
+            search = true;
+
+            // Figure out which field type to use
+            if (field.equals("A")) {
+                field = "title";
+            } else if (field.equals("B")) {
+                field = "artist";
             } else {
-                System.out.print("\nUser ID not found. Please try again: ");
+                field = "genre";
             }
-        }
 
-        // If the user wants to generate a random user ID
-        int usersLength = rec.data.getUsernames().size();
-        if (user.equals("R")) {
-            user = rec.data.getUsernames().get((int)(Math.random() * 
-            usersLength));
-        }
-        search = true;
+            // Get method input
+            System.out.println("\nSelect the method you would like to use to "
+                    + "generate the playlist: ");
+            System.out.println("Euclidean: Enter A");
+            System.out.println("Pearson: Enter B");
 
-        // Get field input
-        System.out.println("\nSelect the field you would like to generate "
-                + "the playlist based on: ");
-        System.out.println("Song Title: Enter A");
-        System.out.println("Artist: Enter B");
-        System.out.println("Genre, Enter C");
-
-        while (search) {
-            field = input.next();
-            if (field.toUpperCase().equals("A") || field.toUpperCase().equals("B") || field.equals("C")) {
-                search = false;
-            } else {
-                System.out.print(field + " is not a valid selection. Please "
-                        + "choose A, B, or C: ");
+            while (search) {
+                method = input.next();
+                if (method.toUpperCase().equals("A") || method.toUpperCase().equals("B")) {
+                    search = false;
+                } else {
+                    System.out.print(method + " is not a valid selection."
+                            + "Please choose Euclidean or Pearson: ");
+                }
             }
-        }
-        search = true;
+            search = true;
 
-        // Figure out which field type to use
-        if (field.equals("A")) {
-            field = "title";
-        } else if (field.equals("B")) {
-            field = "artist";
-        } else {
-            field = "genre";
-        }
+            // Get number of tracks
+            System.out.print("\nEnter the number of tracks that should be on"
+                    + " the playlist: ");
 
-        // Get method input
-        System.out.println("\nSelect the method you would like to use to "
-                + "generate the playlist: ");
-        System.out.println("Euclidean: Enter A");
-        System.out.println("Pearson: Enter B");
-
-        while (search) {
-            method = input.next();
-            if (method.toUpperCase().equals("A") || method.toUpperCase().equals("B")) {
-                search = false;
-            } else {
-                System.out.print(method + " is not a valid selection. Please "
-                        + "choose Euclidean or Pearson: ");
+            while (search) {
+                try {
+                    number = input.nextInt();
+                    search = false;
+                } catch (InputMismatchException e) {
+                    System.out.print("The value entered is not an integer. "
+                            + "Please try again: ");
+                    input.next();
+                }
             }
-        }
-        search = true;
+            search = true;
 
-        // Get number of tracks
-        System.out.print("\nEnter the number of tracks that should be on the" +
-                " playlist: ");
+            System.out.println("\nGenerating playlist...");
 
-        while (search) {
-            try {
-                number = input.nextInt();
-                search = false;
-            } catch (InputMismatchException e) {
-                System.out.print("The value entered is not an integer. "
-                        + "Please try again: ");
-                input.next();
+            ArrayList<TrackInfo> playList = rec.makePlaylist(user, field,
+                    method, number);
+
+            System.out.println("\nYour playlist:");
+
+            for (int i = 0; i < playList.size(); i++) {
+                System.out.println((i + 1) + ". " + playList.get(i).getTitle()
+                        + " by " + playList.get(i).getArtist());
             }
-        }
-        search = true;
 
-        System.out.println("\nGenerating playlist...");
+            // Ask the user if they want to create another playlist
+            System.out.print("\nCreate another playlist? Enter Y to continue, "
+            + "or Q to quit: ");
+            while (search) {
+                leave = input.next();
+                if (leave.equals("Y") || leave.equals("Q")) 
+                    {
+                    search = false;
+                } else {
+                    System.out.print(leave + " is not a valid selection."
+                            + "Please enter Y or Q: ");
+                }
+            }
+            search = true;
 
-        ArrayList<TrackInfo> playList = rec.makePlaylist(user, field, method,
-                number);
+            if (leave.equals("Q")) {
+                break;
+            }
 
-        System.out.println("\nYour playlist:");
-
-        for (int i = 0; i < playList.size(); i++) {
-            System.out.println((i + 1) + ". " + playList.get(i).getTitle() 
-            + " by " + playList.get(i).getArtist());
         }
 
         input.close();
